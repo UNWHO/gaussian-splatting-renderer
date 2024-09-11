@@ -1,0 +1,8 @@
+{
+    "rust-analyzer.cargo.cfgs": {
+        "target_arch": "wasm32",
+        "web_platform": null,
+        "debug_assertions": null,
+        "miri": null
+    },
+}

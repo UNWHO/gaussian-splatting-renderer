@@ -14,7 +14,9 @@ use wgpu_sort::{utils::guess_workgroup_size, GPUSorter};
 use winit::{event_loop::EventLoop, window};
 
 const SPLAT_SIZE: u64 = 64;
-const NUM_SLPAT: u32 = 600000 * 2;
+const NUM_SLPAT: u32 = 130000000;
+// const NUM_SLPAT: u32 = 600000 * 20;
+
 const WG_SIZE: u64 = 64;
 
 const TILE_SZ: u32 = 8;
@@ -70,6 +72,7 @@ pub async fn render(gaussians: &[f32], num_gaussian: u64, cam_param: &[f32], siz
     limit.max_storage_buffer_binding_size = 2147483640;
     limit.max_compute_workgroup_storage_size = 32768;
     limit.max_storage_buffers_per_shader_stage = 10;
+    limit.max_buffer_size = 2147483640;
 
     let (device, queue) = adapter
         .request_device(
@@ -110,7 +113,25 @@ pub async fn render(gaussians: &[f32], num_gaussian: u64, cam_param: &[f32], siz
     let cam_target = nalgebra::Point3::<f32>::from_slice(&cam_param[3..6]);
     let cam_up = nalgebra::Vector3::<f32>::from_column_slice(&cam_param[6..9]);
 
-    let view_matrix = Matrix4::look_at_lh(&cam_position, &cam_target, &cam_up);
+    let view_matrix = Matrix4::<f32>::from_column_slice(&[
+        0.8761342167854309,
+        0.06925962120294571,
+        0.4770660102367401,
+        0.0,
+        -0.0474742166697979,
+        0.9972110986709595,
+        -0.05758674070239067,
+        0.0,
+        -0.4797239303588867,
+        0.027805376797914505,
+        0.8769788146018982,
+        0.0,
+        0.8307245969772339,
+        0.4233042001724243,
+        4.720196723937988,
+        1.0,
+    ]);
+    // Matrix4::look_at_lh(&cam_position, &cam_target, &cam_up);
 
     let camera_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
         label: Some("Camera"),

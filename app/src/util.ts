@@ -1,6 +1,7 @@
 import { Gaussian } from "./ply";
 import cameraJson from "../public/cameras.json";
 import { Matrix3, Matrix4, Object3D, Quaternion, Vector3 } from "three";
+import { mat3, mat4, vec3 } from "wgpu-matrix";
 
 const normalize = (...elements: number[]): number[] => {
   const magnitude = elements.map((e) => e * e).reduce((acc, e) => acc + e, 0);
@@ -52,32 +53,44 @@ export const loadCamera = () => {
     obj.translateY(json.position[1]);
     obj.translateZ(json.position[2]);
 
-    let rotation = new Matrix4().setFromMatrix3(
-      new Matrix3().set(
-        json.rotation[0][0],
-        json.rotation[0][1],
-        json.rotation[0][2],
-        json.rotation[1][0],
-        json.rotation[1][1],
-        json.rotation[1][2],
-        json.rotation[2][0],
-        json.rotation[2][1],
-        json.rotation[2][2]
-      )
-    );
+    let rotation = new Matrix4()
+      .identity()
+      .setFromMatrix3(
+        new Matrix3().set(
+          json.rotation[0][0],
+          json.rotation[1][0],
+          json.rotation[2][0],
+          json.rotation[0][1],
+          json.rotation[1][1],
+          json.rotation[2][1],
+          json.rotation[0][2],
+          json.rotation[1][2],
+          json.rotation[2][2]
+        )
+      );
 
     obj.setRotationFromQuaternion(
       new Quaternion().setFromRotationMatrix(rotation)
     );
-    obj.updateMatrix();
 
+    obj.updateMatrix();
+    // obj.updateMatrixWorld()
     const dir = new Vector3();
     obj.getWorldDirection(dir);
+
+    const R = mat3.create(...json.rotation.flat());
+    const T = json.position;
+
+    const V = mat4.fromMat3(R);
+    // const t = vec3.mulScalar(T, -1);
+    mat4.translate(V, T, V);
+
+    // console.log(V);
 
     return {
       cameraParam: [
         ...obj.position.toArray(),
-        ...dir.toArray(),
+        ...dir.toArray().map((e, i) => e + json.position[i]),
         ...obj.up.multiplyScalar(-1).toArray(),
         json.fx,
         json.fy,

@@ -20,6 +20,7 @@
     "@loaders.gl/ply": "^4.2.2",
     "gs": "file:../pkg",
     "three": "^0.165.0",
-    "webgpu-utils": "^1.7.2"
+    "webgpu-utils": "^1.7.2",
+    "wgpu-matrix": "^3.0.1"
   }
 }
